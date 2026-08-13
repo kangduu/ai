@@ -1,2 +1,9 @@
-# ai
-Head towards AI
+# Head towards AI
+
+## prompt
+
+## agent
+
+## skill
+
+## ...
