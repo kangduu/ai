@@ -1,183 +1,102 @@
 ---
 name: git-commit-message
-description: Generate high-quality Git commit messages from staged or unstaged changes. Use when the user asks for commit message, git commit, 提交信息, commit message, conventional commit, or wants to summarize code changes before committing.
+description: Writes detailed Conventional Commits messages in Simplified Chinese from git diffs. Use when generating, reviewing, or wording a commit message, 提交信息, or conventional commit text. Do not use this skill to run git add, git commit, or git push; executing a commit is handled by the /commit command.
 ---
 
-# Git Commit Message Skill
+# Git Commit Message
 
-你是一个专门生成 Git 提交信息的助手。你的目标是根据当前代码改动生成清晰、准确、可直接使用的提交信息。
+只根据真实 diff 生成提交文案。不执行 `git add`、`git commit`、`git push`。
 
-## 触发场景
+真正提交由用户使用 `/commit` 完成。若当前请求来自 `/commit`，仍按本文案规则写 message，执行步骤交给那条命令。
 
-当用户提出以下需求时使用本 skill：
+## 何时使用
 
-- 生成 git commit message
-- 根据 diff 写提交信息
-- 帮我提交代码
-- 写一个符合规范的 commit
-- 生成中文或英文提交信息
-- 按 Conventional Commits 格式生成提交信息
+- 生成或润色 commit message
+- 按 Conventional Commits 写中文提交说明
+- `/commit` 需要提交文案时
 
-## 工作流程
+不要在用户只是说「提交代码」时擅自 commit。
 
-1. 查看当前 Git 状态：
+## 读取改动
 
-   ```bash
-   git status --short
-   ```
+只读检查，不改暂存区：
 
-2. 优先查看已暂存的改动：
+1. `git status --short`
+2. 优先 `git diff --cached`
+3. 若没有已暂存改动，再看 `git diff`
+4. 需要对齐风格时看 `git log -8 --oneline`
 
-   ```bash
-   git diff --cached
-   ```
+不要夸大范围，不要编造未出现的变化。多个不相关主题时建议拆成多条 message，不要写成一次提交。
 
-3. 如果没有已暂存改动，再查看未暂存改动：
+## 默认格式（详细版）
 
-   ```bash
-   git diff
-   ```
-
-4. 根据改动内容判断提交类型。
-
-5. 默认生成 Conventional Commits 风格的提交信息。
-
-6. 不要夸大改动范围，不要编造没有发生的变化。
-
-7. 如果改动包含多个不相关主题，应建议拆分成多个 commit。
-
-## 提交类型规则
-
-优先使用以下类型：
-
-* `feat`: 新功能
-* `fix`: 修复 bug
-* `refactor`: 重构，不改变外部行为
-* `perf`: 性能优化
-* `style`: 代码格式、样式调整，不影响逻辑
-* `docs`: 文档修改
-* `test`: 测试相关
-* `build`: 构建、依赖、打包配置
-* `ci`: CI/CD 配置
-* `chore`: 杂项维护
-* `revert`: 回滚提交
-
-## 输出格式
-
-默认输出 3 个版本。
-
-### 推荐版本
-
-```bash
-git commit -m "type(scope): summary"
-```
-
-### 简洁版本
+只输出这一种，除非用户明确只要单行：
 
 ```text
-type(scope): summary
+type(scope): 中文摘要
+
+- 主要改动 1
+- 主要改动 2
+- 影响范围或注意事项
 ```
 
-### 详细版本
+- `type` 英文；`scope` 英文小写；摘要不加句号，尽量不超过 72 字符。
+- 用户用中文提问时说明用简体中文；明确要求英文时用英文。
+- 组件名、模块名、路径、变量、函数、API、配置键保持英文，不翻译。
+- diff 很大时先概括，再写 message。
 
-```text
-type(scope): summary
+## 类型
 
-- 说明主要改动 1
-- 说明主要改动 2
-- 说明影响范围或注意事项
-```
+- `feat`: 新功能
+- `fix`: 修复 bug
+- `refactor`: 重构，不改变外部行为
+- `perf`: 性能优化
+- `style`: 格式调整，不影响逻辑
+- `docs`: 文档
+- `test`: 测试
+- `build`: 构建、依赖、打包配置
+- `ci`: CI/CD
+- `chore`: 杂项维护
+- `revert`: 回滚
 
-## 语言规则
+## Scope
 
-* 如果用户用中文提问，提交说明默认用中文。
-* 如果用户明确要求英文，则用英文。
-* `type` 必须使用英文。
-* `scope` 使用英文小写。
-* summary 保持简洁，建议不超过 72 个字符。
-* 不要在 summary 末尾添加句号。
+前端常见：`ui`、`component`、`page`、`hooks`、`router`、`store`、`api`、`auth`、`layout`、`styles`、`deps`、`config`。
 
-## React 前端项目偏好
+按路径判断：
 
-对于 React / 前端项目，常见 scope 可使用：
-
-* `ui`
-* `component`
-* `hooks`
-* `router`
-* `store`
-* `api`
-* `auth`
-* `layout`
-* `styles`
-* `deps`
-* `config`
-
-## 判断 scope 的建议
-
-根据改动文件路径判断 scope：
-
-* `src/components/**` → `component`
-* `src/pages/**` → `page`
-* `src/hooks/**` → `hooks`
-* `src/router/**` → `router`
-* `src/store/**` → `store`
-* `src/api/**` → `api`
-* `src/styles/**` → `styles`
-* `package.json` / lockfile → `deps`
-* `vite.config.*` / `webpack.config.*` / `tsconfig.json` → `config`
+- `app/components/**`、`src/components/**` → `component`
+- `app/pages/**`、`src/pages/**` → `page`
+- `app/hooks/**`、`src/hooks/**` → `hooks`
+- `app/routes.ts`、`src/router/**` → `router`
+- `app/stores/**`、`src/store/**` → `store`
+- `app/requests/**`、`src/api/**` → `api`
+- `app/styles/**`、`src/styles/**` → `styles`
+- `package.json` / lockfile → `deps`
+- `vite.config.*` / `tsconfig.json` → `config`
 
 ## 示例
 
-### 新增登录表单校验
+```text
+feat(auth): 添加登录表单校验
 
-```bash
-git commit -m "feat(auth): 添加登录表单校验"
+- 为登录表单补充必填与格式校验
+- 校验失败时在表单项下方展示错误提示
 ```
 
-### 修复按钮点击无响应问题
+```text
+fix(ui): 修复按钮点击无响应问题
 
-```bash
-git commit -m "fix(ui): 修复按钮点击无响应问题"
+- 修正点击处理未绑定到实际按钮节点的问题
+- 保持原有按钮样式与禁用态不变
 ```
 
-### 重构用户列表组件
+```text
+refactor(component): 重构用户列表组件
 
-```bash
-git commit -m "refactor(component): 重构用户列表组件"
+- 抽出列表项渲染逻辑，不改变筛选与分页行为
 ```
 
-### 调整 ESLint 配置
+## 安全
 
-```bash
-git commit -m "chore(config): 调整 ESLint 配置"
-```
-
-### 更新依赖
-
-```bash
-git commit -m "build(deps): 更新项目依赖"
-```
-
-## 安全检查
-
-在生成提交信息前，注意检查改动中是否包含：
-
-* 密钥
-* token
-* API Key
-* 密码
-* 私有证书
-* `.env` 敏感配置
-* 用户隐私数据
-
-如果发现这些内容，应提醒用户不要提交，并建议先移除敏感信息。
-
-## 注意事项
-
-* 不要自动执行 `git add .`。
-* 不要自动执行 `git commit`，除非用户明确要求。
-* 如果用户只是要提交信息，只输出提交信息。
-* 如果 diff 很大，先总结改动，再给出 commit message。
-* 如果改动涉及多个独立功能，建议拆分 commit。
-* 提交信息必须基于真实 diff，不要凭空猜测。
+生成文案前检查是否包含密钥、token、API Key、密码、证书、`.env`、用户隐私数据。若有，明确提醒不要提交，并说明应先移除。
