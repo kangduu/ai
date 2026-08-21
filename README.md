@@ -18,22 +18,35 @@ skills/
 
 ### Cursor IDE / TUI
 
+项目级（当前仓库 `.agents/skills/`）：
+
 ```bash
 npx skills add kangduu/ai --skill git-commit -a cursor
 ```
 
-全局安装加 `-g`（落到 `~/.cursor/skills/`）。项目级落到 `.agents/skills/`。
+全局（所有项目 `~/.cursor/skills/`）：
+
+```bash
+npx skills add kangduu/ai --skill git-commit -a cursor -g
+```
 
 ### Codex IDE / TUI
+
+项目级（当前仓库 `.agents/skills/`）：
 
 ```bash
 npx skills add kangduu/ai --skill git-commit -a codex
 ```
 
-或在 Codex 里用自带 `$skill-installer`：
+全局（所有项目 `~/.codex/skills/`）：
 
 ```bash
-# 安装到 ~/.codex/skills/git-commit
+npx skills add kangduu/ai --skill git-commit -a codex -g
+```
+
+或在 Codex 里用自带 `$skill-installer`（默认安装到全局 `~/.codex/skills/git-commit`）：
+
+```bash
 --repo kangduu/ai --path skills/git-commit
 ```
 
